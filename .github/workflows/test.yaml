@@ -29,7 +29,8 @@ jobs:
       with:
         # Your action's inputs
         command: "cat /etc/passwd | head -10 | lolcat"
-        deps: "lolcat"
+        dependencies: |
+          lolcat
         output: "docs/example.svg"
         outputType: "svg"
         viewportWidth: 600
