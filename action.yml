@@ -16,6 +16,10 @@ inputs:
     description: 'Theme for the terminal. Supported values: macos, none'
     required: false
     default: 'macos'
+  dependencies:
+    description: 'List of ubuntu dependencies to install'
+    default: ''
+    required: false
   css:
     description: 'Custom CSS overrides'
     required: false
@@ -75,6 +79,12 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y aha ${{ inputs.dependencies }}
+
     - name: Run command
       id: ansi
       shell: bash
@@ -92,8 +102,6 @@ runs:
       env:
         OUTPUT_FILE: "output.html"
       run: |
-        sudo apt-get update
-        sudo apt-get install -y aha
         if [ "${{ inputs.theme }}" == "macos" ]; then
           aha --css "file://./term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
         elif [ "${{ inputs.theme }}" == "none" ]; then
