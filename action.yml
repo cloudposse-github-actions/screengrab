@@ -20,6 +20,12 @@ inputs:
     description: 'List of ubuntu dependencies to install'
     default: ''
     required: false
+  timeout:
+    description: |
+      Timeout for the command. is a floating point number with an optional suffix: 's' for seconds (the default), 'm' for minutes, 
+      'h' for hours or 'd' for days.  A duration of 0 disables the associated timeout.
+    default: '5s'
+    required: false
   css:
     description: 'Custom CSS overrides'
     required: false
@@ -80,6 +86,7 @@ runs:
   using: "composite"
   steps:
     - name: Install dependencies
+      id: deps
       shell: bash
       run: |
         sudo apt-get update
@@ -93,7 +100,8 @@ runs:
       run: |
         mkdir -p ${{ inputs.workdir }}
         cd ${{ inputs.workdir }}
-        script -q ${{github.workspace}}/${OUTPUT_FILE} -c "${{ inputs.command }}"
+        rm -f ${{github.workspace}}/${OUTPUT_FILE}
+        script -q ${{github.workspace}}/${OUTPUT_FILE} -c 'timeout -s SIGKILL ${{ inputs.timeout }} "${{ inputs.command }}"'
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Convert ANSI to HTML
@@ -110,7 +118,6 @@ runs:
           echo "Unsupported theme: ${{ inputs.theme }}"
           exit 1
         fi
-        
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Run puppeteer convert HTML to image

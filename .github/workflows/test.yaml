@@ -28,7 +28,8 @@ jobs:
       uses: ./ # Use the path to your action directory
       with:
         # Your action's inputs
-        command: "ps uxa"
+        command: "cat /etc/passwd | head -10 | lolcat"
+        deps: "lolcat"
         output: "docs/example.svg"
         outputType: "svg"
         viewportWidth: 600
