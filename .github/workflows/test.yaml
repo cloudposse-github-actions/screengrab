@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run this composite action
+      id: screengrab
+      uses: ./ # Use the path to your action directory
+      with:
+        # Your action's inputs
+        command: "ps uxa"
+        output: "docs/example.svg"
+        outputType: "svg"
+        viewportWidth: 600
+        viewportHeight: 450
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      name: Commit artifact
+      id: auto-commit
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        commit_message: "chore: update example image"
+        commit_user_name: screengrab-action 💻
+        commit_user_email: actions@github.com
+        commit_author: screengrab-action 💻 <actions@github.com>
+        file_pattern: 'docs/*.png'
+
+    - name: Add Image to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true'
+      run: |
+        echo "## Generated Screengrab" >> $GITHUB_STEP_SUMMARY
+        echo "![Generated Screengrab](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: No changes
+      if: steps.auto-commit.outputs.changes_detected == 'false'
+      run: |
+        echo "No changes to screengrab" >> $GITHUB_STEP_SUMMARY

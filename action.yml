@@ -1,23 +1,131 @@
-name: 'Example composite GitHub action'
-description: 'Example composite GitHub action'
+name: 'Screengrab'
+description: "Generate a screenshot from any command. Supports SVG, JPG, PNG, or PDF."
 author: hello@cloudposse.com
 branding:
-  icon: 'file'
+  icon: 'camera'
   color: 'white'
 inputs:
-  param1:
+  command:
+    description: 'Command to run (make sure it is already installed!)'
     required: true
-    description: "Input parameter placeholder"
-    default: "true"
+  workdir:
+    description: 'Working directory for the command'
+    required: false
+    default: '.'
+  theme:
+    description: 'Theme for the terminal. Supported values: macos, none'
+    required: false
+    default: 'macos'
+  css:
+    description: 'Custom CSS overrides'
+    required: false
+  output:
+    description: 'Output image file path'
+    required: false
+    default: screenshot.svg
+  outputType:
+    description: 'Output image type (svg, png, jpeg, pdf)'
+    default: svg
+  omitBackground:
+    description: 'Omit the browser default background. Enable to support transparency.'
+    default: 'true'
+  viewportWidth:
+    description: 'Viewport width in pixels'
+    default: '600'
+    required: true
+  viewportHeight:
+    description: 'Viewport height in pixels'
+    default: '450'
+    required: true
+  imageQuality:
+    description: 'Quality of the output image (1-100, applicable for JPEG)'
+    required: false
+  consoleOutputEnabled:
+    description: 'Whether or not to output the browser console log'
+    default: 'true'
+  deviceScaleFactor:
+    description: 'Specifies the device scale factor (pixel ratio) for the web page rendering. It determines how many physical pixels are used to represent a single logical pixel. For example, a device scale factor of 2 means one logical pixel is represented by two physical pixels, commonly used for high-DPI (Retina) displays. A value of 1 uses standard pixel density. This factor affects the resolution and quality of the rendered page or screenshot.'
+    default: '2'
+    required: false
+  fullPage:
+    description: 'Screen capture the entire page by scrolling down'
+    default: 'false'
+  waitForTimeout:
+    description: 'Number of milliseconds to delay before taking screenshot'
+    default: '500'
+  puppeteerImage:
+    description: 'Docker image to run puppeteer. See https://github.com/puppeteer/puppeteer/pkgs/container/puppeteer'
+    default: 'ghcr.io/cloudposse-github-actions/screenshot:sha-65d10e40b3507a6d752bd0be8a9647f681b46f75'
+  token:
+    description: 'A GitHub token'
+    required: false
+    default: ""
+
 outputs:
-  result1:
-    description: "Output result placeholder"
-    value: "${{ steps.context.outputs.action-result }}"
+  image:
+    description: "File containing the generated image"
+    value: "${{ steps.image.outputs.file }}"
+  ansi:
+    description: "File containing the generated ANSI"
+    value: "${{ steps.ansi.outputs.file }}"
+  html:
+    description: "File containing the generated HTML"
+    value: "${{ steps.html.outputs.file }}"
+
 runs:
   using: "composite"
   steps:
-    - id: context
+    - name: Run command
+      id: ansi
+      shell: bash
+      env:
+        OUTPUT_FILE: "output.ansi"
+      run: |
+        mkdir -p ${{ inputs.workdir }}
+        cd ${{ inputs.workdir }}
+        script -q ${{github.workspace}}/${OUTPUT_FILE} -c "${{ inputs.command }}"
+        echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
+
+    - name: Convert ANSI to HTML
+      id: html
+      shell: bash
+      env:
+        OUTPUT_FILE: "output.html"
+      run: |
+        apt-get update
+        apt-get install -y aha
+        if [ "${{ inputs.theme }}" == "macos" ]; then
+          aha --css "file://./term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
+        elif [ "${{ inputs.theme }}" == "none" ]; then
+          aha < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" > ${{ github.workspace }}/${OUTPUT_FILE}
+        else
+          echo "Unsupported theme: ${{ inputs.theme }}"
+          exit 1
+        fi
+        
+        echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
+
+    - name: Run puppeteer convert HTML to image
+      id: screenshot
+      uses: 'cloudposse-github-actions/screenshot@svg-support'
+      with:
+        # Your action's inputs
+        url: "file://${{ github.workspace }}/${{ steps.html.outputs.file }}"
+        output: "${{ inputs.output }}"
+        css: "${{ inputs.css }}"
+        viewportWidth: "${{ inputs.viewportWidth }}"
+        viewportHeight: "${{ inputs.viewportHeight }"
+        outputType: "${{ inputs.outputType }}"
+        omitBackground: "${{ inputs.omitBackground }}"
+        imageQuality: "${{ inputs.imageQuality }}"
+        consoleOutputEnabled: "${{ inputs.consoleOutputEnabled }}"
+        deviceScaleFactor: "${{ inputs.deviceScaleFactor }}"
+        fullPage: "${{ inputs.fullPage }}"
+        waitForTimeout: "${{ inputs.waitForTimeout }}"
+        puppeteerImage: "${{ inputs.puppeteerImage }}"
+        token: ${{ inputs.token }}
+
+    - id: image
       shell: bash
       run: |
-          echo "action-result=${{ inputs.param1 }}" >> $GITHUB_OUTPUT
-
+          echo "file=${{ inputs.output }}" >> $GITHUB_OUTPUT
