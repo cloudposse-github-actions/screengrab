@@ -106,7 +106,7 @@ runs:
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Run puppeteer convert HTML to image
-      id: screenshot
+      id: screengrab
       uses: 'cloudposse-github-actions/screenshot@svg-support'
       with:
         # Your action's inputs
@@ -114,7 +114,7 @@ runs:
         output: "${{ inputs.output }}"
         css: "${{ inputs.css }}"
         viewportWidth: "${{ inputs.viewportWidth }}"
-        viewportHeight: "${{ inputs.viewportHeight }"
+        viewportHeight: "${{ inputs.viewportHeight }}"
         outputType: "${{ inputs.outputType }}"
         omitBackground: "${{ inputs.omitBackground }}"
         imageQuality: "${{ inputs.imageQuality }}"
