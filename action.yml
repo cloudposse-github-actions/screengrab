@@ -92,8 +92,8 @@ runs:
       env:
         OUTPUT_FILE: "output.html"
       run: |
-        apt-get update
-        apt-get install -y aha
+        sudo apt-get update
+        sudo apt-get install -y aha
         if [ "${{ inputs.theme }}" == "macos" ]; then
           aha --css "file://./term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
         elif [ "${{ inputs.theme }}" == "none" ]; then
@@ -106,7 +106,7 @@ runs:
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Run puppeteer convert HTML to image
-      id: screengrab
+      id: screenshot
       uses: 'cloudposse-github-actions/screenshot@svg-support'
       with:
         # Your action's inputs

@@ -9,7 +9,7 @@ permissions:
   packages: read
 
 jobs:
-  screenshot:
+  screengrab:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
