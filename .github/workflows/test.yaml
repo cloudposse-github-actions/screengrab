@@ -9,11 +9,16 @@ permissions:
   packages: read
 
 jobs:
+
+
   screengrab:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.type }}
       cancel-in-progress: true
+    strategy:
+      matrix:
+        type: [svg, png, jpg, pdf]
 
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
@@ -31,8 +36,8 @@ jobs:
         command: "cat /etc/passwd | lolcat"
         dependencies: |
           lolcat
-        output: "docs/example.svg"
-        outputType: "svg"
+        output: "docs/example.${{ matrix.type }}"
+        outputType: "${{ matrix.type }}"
         viewportWidth: 600
         viewportHeight: 450
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -43,16 +48,16 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        commit_message: "chore: update example image"
+        commit_message: "chore: update ${{matrix.type}} example image"
         commit_user_name: screengrab-action 💻
         commit_user_email: actions@github.com
         commit_author: screengrab-action 💻 <actions@github.com>
-        file_pattern: 'docs/*.svg'
+        file_pattern: '${{ steps.screengrab.outputs.image }}'
 
     - name: Add Image to Step Summary
       if: steps.auto-commit.outputs.changes_detected == 'true'
       run: |
-        echo "## Generated Screengrab" >> $GITHUB_STEP_SUMMARY
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
         echo "![Generated Screengrab](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
 
     - name: No changes
