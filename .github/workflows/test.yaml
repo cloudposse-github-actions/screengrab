@@ -46,7 +46,9 @@ jobs:
     - name: Rebase before push (optimistic concurrency)
       shell: bash
       run: |
+          git stash
           git pull origin ${{ github.ref }} --rebase
+          git stash apply
 
     - uses: stefanzweifel/git-auto-commit-action@v5
       name: Commit artifact
