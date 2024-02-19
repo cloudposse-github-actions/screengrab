@@ -34,7 +34,7 @@ jobs:
       with:
         # Your action's inputs
         command: "repeat 3 fortune 50% ascii-art 50% computers | lolcat"
-        dependencies: |
+        dependencies: >-
           lolcat
           fortune
         output: "docs/example.${{ matrix.type }}"
