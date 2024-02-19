@@ -126,7 +126,7 @@ runs:
           exit 1
         fi
         # Inject the command into the HTML (command may contains special characters, so we cannot use simple sed)
-        cat<__EOF__ > ${{ github.workspace }}/command.txt
+        cat << "__EOF__" > ${{ github.workspace }}/command.txt
         ${{ inputs.command }}
         __EOF__
         sed -i '/<h1 id="title">/r command.txt' > ${{ github.workspace }}/${OUTPUT_FILE}
