@@ -33,9 +33,10 @@ jobs:
       uses: ./ # Use the path to your action directory
       with:
         # Your action's inputs
-        command: "cat /etc/passwd | lolcat"
+        command: "repeat 3 fortune 50% ascii-art 50% computers | lolcat"
         dependencies: |
           lolcat
+          fortune
         output: "docs/example.${{ matrix.type }}"
         outputType: "${{ matrix.type }}"
         viewportWidth: 600
@@ -52,7 +53,7 @@ jobs:
         commit_user_name: screengrab-action 💻
         commit_user_email: actions@github.com
         commit_author: screengrab-action 💻 <actions@github.com>
-        file_pattern: '${{ steps.screengrab.outputs.image }}'
+        file_pattern: '${{ steps.screengrab.outputs.file }}'
 
     - name: Add Image to Step Summary
       if: steps.auto-commit.outputs.changes_detected == 'true' && (matrix.type == 'svg' || matrix.type == 'png' || matrix.type == 'jpg')
