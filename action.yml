@@ -1,5 +1,5 @@
 name: 'Screengrab'
-description: "Generate a screenshot from any command. Supports SVG, JPG, PNG, or PDF."
+description: "Generate a screenshot from any command. Supports SVG, JPG, PNG, PDF, ANSI, HTML."
 author: hello@cloudposse.com
 branding:
   icon: 'camera'
@@ -125,10 +125,15 @@ runs:
           echo "Unsupported theme: ${{ inputs.theme }}"
           exit 1
         fi
+        # Inject the command into the HTML
+        sed 's/\(<h1 id="title">\)/\1${{ inputs.command }}/g' -i ${{ github.workspace }}/${OUTPUT_FILE}
+        cat ${{ github.workspace }}/${OUTPUT_FILE}
+        # Return the file as an output
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Run puppeteer convert HTML to image
       id: screenshot
+      if: ${{ contains(['svg', 'png', 'jpeg', 'jpg', 'pdf'], inputs.outputType) }}
       uses: 'cloudposse-github-actions/screenshot@svg-support'
       with:
         # Your action's inputs
@@ -151,5 +156,6 @@ runs:
 
     - id: image
       shell: bash
+      if: ${{ steps.screenshot.outputs.file != '' }}
       run: |
           echo "file=${{ inputs.output }}" >> $GITHUB_OUTPUT
