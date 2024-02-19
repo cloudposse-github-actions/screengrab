@@ -38,6 +38,9 @@ h1 {
   align-items: start;
   justify-content: space-between;
   width: 60px; /* Adjust the width as needed */
+  position: relative;
+  left: 15px;
+  top: 17px;
 }
 
 /* General styles for each dot */

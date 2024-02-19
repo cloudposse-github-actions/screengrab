@@ -55,10 +55,16 @@ jobs:
         file_pattern: '${{ steps.screengrab.outputs.image }}'
 
     - name: Add Image to Step Summary
-      if: steps.auto-commit.outputs.changes_detected == 'true'
+      if: steps.auto-commit.outputs.changes_detected == 'true' && (matrix.type == 'svg' || matrix.type == 'png' || matrix.type == 'jpg')
       run: |
         echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
         echo "![Generated Screengrab](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add PDF to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'pdf'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated PDF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
 
     - name: No changes
       if: steps.auto-commit.outputs.changes_detected == 'false'
