@@ -18,7 +18,7 @@ jobs:
       cancel-in-progress: true
     strategy:
       matrix:
-        type: [svg, png, jpg, pdf]
+        type: [svg, png, jpg, pdf, html, ansi]
 
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
@@ -65,6 +65,18 @@ jobs:
       run: |
         echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
         echo "[Generated PDF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add HTML to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'html'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated HTML](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.html }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add ANSI to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'ansi'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated ANSI](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.ansi }}?raw=true)" >> $GITHUB_STEP_SUMMARY
 
     - name: No changes
       if: steps.auto-commit.outputs.changes_detected == 'false'
