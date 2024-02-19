@@ -47,7 +47,7 @@ jobs:
       shell: bash
       run: |
           git stash || true
-          git pull origin ${{ github.ref }} --rebase
+          git pull --rebase -X ours origin ${{ github.ref }} --rebase
           git stash apply || true
 
     - uses: stefanzweifel/git-auto-commit-action@v5
