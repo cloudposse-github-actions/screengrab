@@ -125,8 +125,12 @@ runs:
           echo "Unsupported theme: ${{ inputs.theme }}"
           exit 1
         fi
-        # Inject the command into the HTML
-        sed 's/\(<h1 id="title">\)/\1${{ inputs.command }}/g' -i ${{ github.workspace }}/${OUTPUT_FILE}
+        # Inject the command into the HTML (command may contains special characters, so we cannot use simple sed)
+        cat<__EOF__ > ${{ github.workspace }}/command.txt
+        ${{ inputs.command }}
+        __EOF__
+        sed -i '/<h1 id="title">/r command.txt' > ${{ github.workspace }}/${OUTPUT_FILE}
+
         cat ${{ github.workspace }}/${OUTPUT_FILE}
         # Return the file as an output
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
