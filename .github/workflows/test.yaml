@@ -47,7 +47,7 @@ jobs:
         commit_user_name: screengrab-action 💻
         commit_user_email: actions@github.com
         commit_author: screengrab-action 💻 <actions@github.com>
-        file_pattern: 'docs/*.png'
+        file_pattern: 'docs/*.svg'
 
     - name: Add Image to Step Summary
       if: steps.auto-commit.outputs.changes_detected == 'true'
