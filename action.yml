@@ -101,7 +101,7 @@ runs:
         mkdir -p ${{ inputs.workdir }}
         cd ${{ inputs.workdir }}
         rm -f ${{github.workspace}}/${OUTPUT_FILE}
-        timeout -s SIGKILL ${{ inputs.timeout }} script -F -q ${{github.workspace}}/${OUTPUT_FILE} bash -c '${{ inputs.command }}'
+        timeout -s SIGKILL ${{ inputs.timeout }} script -f -q ${{github.workspace}}/${OUTPUT_FILE} bash -c '${{ inputs.command }}'
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Convert ANSI to HTML
