@@ -111,7 +111,8 @@ runs:
         OUTPUT_FILE: "output.html"
       run: |
         if [ "${{ inputs.theme }}" == "macos" ]; then
-          aha --css "file://./term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
+          aha --css "file://${{ github.workspace }}/term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | \
+            sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
         elif [ "${{ inputs.theme }}" == "none" ]; then
           aha < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" > ${{ github.workspace }}/${OUTPUT_FILE}
         else
