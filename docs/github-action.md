@@ -11,11 +11,12 @@
 | deviceScaleFactor | Specifies the device scale factor (pixel ratio) for the web page rendering. It determines how many physical pixels are used to represent a single logical pixel. For example, a device scale factor of 2 means one logical pixel is represented by two physical pixels, commonly used for high-DPI (Retina) displays. A value of 1 uses standard pixel density. This factor affects the resolution and quality of the rendered page or screenshot. | 2 | false |
 | fullPage | Screen capture the entire page by scrolling down | false | false |
 | imageQuality | Quality of the output image (1-100, applicable for JPEG) | N/A | false |
-| omitBackground | Omit the browser default background. Enable to support transparency. | true | false |
+| omitBackground | Omit the browser default background. Enable to support transparency. | false | false |
 | output | Output image file path | screenshot.svg | false |
 | outputType | Output image type (svg, png, jpeg, pdf) | svg | false |
 | puppeteerImage | Docker image to run puppeteer. See https://github.com/puppeteer/puppeteer/pkgs/container/puppeteer | ghcr.io/cloudposse-github-actions/screenshot:sha-65d10e40b3507a6d752bd0be8a9647f681b46f75 | false |
 | theme | Theme for the terminal. Supported values: macos, none | macos | false |
+| timeout | Timeout for the command. is a floating point number with an optional suffix: 's' for seconds (the default), 'm' for minutes, <br>'h' for hours or 'd' for days.  A duration of 0 disables the associated timeout.<br> | 5s | false |
 | token | A GitHub token |  | false |
 | viewportHeight | Viewport height in pixels | 450 | true |
 | viewportWidth | Viewport width in pixels | 600 | true |
@@ -28,6 +29,7 @@
 | Name | Description |
 |------|-------------|
 | ansi | File containing the generated ANSI |
+| file | File containing the screengrab |
 | html | File containing the generated HTML |
 | image | File containing the generated image |
 <!-- markdownlint-restore -->

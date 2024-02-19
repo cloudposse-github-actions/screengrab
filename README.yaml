@@ -54,7 +54,8 @@ introduction: |-
   It's excellent for showcasing still frames of CLI tools or terminal output in your documentation.
   
   > [!IMPORTANT]
-  > This action is optimized for generating static images.
+  > This action is optimized for generating static images, HTML or ANSI files.
+  > If you need to generate a video or GIF, then you should use a different tool.
 
 references:
   - name: "Cloud Posse GitHub Actions"
