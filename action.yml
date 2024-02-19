@@ -134,17 +134,17 @@ runs:
         if [ "${{ inputs.theme }}" == "macos" ]; then
           aha --css "file://${{ github.workspace }}/term.css" < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" | \
             sed '/<body>/r term.html' > ${{ github.workspace }}/${OUTPUT_FILE}
+          # Inject the command into the HTML (command may contains special characters, so we cannot use simple sed)
+          cat << "__EOF__" > ${{ github.workspace }}/command.txt
+          ${{ inputs.command }}
+          __EOF__
+          sed -i '/<h1 id="title">/r command.txt' ${{ github.workspace }}/${OUTPUT_FILE}
         elif [ "${{ inputs.theme }}" == "none" ]; then
-          aha < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" > ${{ github.workspace }}/${OUTPUT_FILE}
+          aha --no-header < "${{ github.workspace }}/${{ steps.ansi.outputs.file }}" > ${{ github.workspace }}/${OUTPUT_FILE}
         else
           echo "Unsupported theme: ${{ inputs.theme }}"
           exit 1
         fi
-        # Inject the command into the HTML (command may contains special characters, so we cannot use simple sed)
-        cat << "__EOF__" > ${{ github.workspace }}/command.txt
-        ${{ inputs.command }}
-        __EOF__
-        sed -i '/<h1 id="title">/r command.txt' ${{ github.workspace }}/${OUTPUT_FILE}
 
         cat ${{ github.workspace }}/${OUTPUT_FILE}
         # Return the file as an output
