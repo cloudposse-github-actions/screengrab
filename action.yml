@@ -101,7 +101,13 @@ runs:
         mkdir -p ${{ inputs.workdir }}
         cd ${{ inputs.workdir }}
         rm -f ${{github.workspace}}/${OUTPUT_FILE}
+
+        # Generate a typescript file from the command, being mindful of the timeout
         timeout -s SIGKILL ${{ inputs.timeout }} script -f -q ${{github.workspace}}/${OUTPUT_FILE} bash -c '${{ inputs.command }}'
+
+        # Delete the first and last lines of the generated typescript file
+        sed -i -e '1,1d' -e '$d' ${{github.workspace}}/${OUTPUT_FILE}
+
         echo "file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
 
     - name: Convert ANSI to HTML
@@ -129,6 +135,8 @@ runs:
         url: "file://${{ github.workspace }}/${{ steps.html.outputs.file }}"
         output: "${{ inputs.output }}"
         css: "${{ inputs.css }}"
+        customizations: |
+          '#title': ${{ inputs.command }}
         viewportWidth: "${{ inputs.viewportWidth }}"
         viewportHeight: "${{ inputs.viewportHeight }}"
         outputType: "${{ inputs.outputType }}"

@@ -18,13 +18,18 @@ h1 {
     left: -30px;
     color: #fff;
     font-weight: bold;
+
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 60%;
+    text-overflow: ellipsis;
 }
 
 
 /* The container for the dots, representing a window control bar */
 .window-bar {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .window-controls {
