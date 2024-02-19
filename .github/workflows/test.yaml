@@ -37,6 +37,7 @@ jobs:
         dependencies: >-
           lolcat
           fortune
+          fortunes
         output: "docs/example.${{ matrix.type }}"
         outputType: "${{ matrix.type }}"
         viewportWidth: 600
