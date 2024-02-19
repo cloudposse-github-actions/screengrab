@@ -129,7 +129,7 @@ runs:
         cat << "__EOF__" > ${{ github.workspace }}/command.txt
         ${{ inputs.command }}
         __EOF__
-        sed -i '/<h1 id="title">/r command.txt' > ${{ github.workspace }}/${OUTPUT_FILE}
+        sed -i '/<h1 id="title">/r command.txt' ${{ github.workspace }}/${OUTPUT_FILE}
 
         cat ${{ github.workspace }}/${OUTPUT_FILE}
         # Return the file as an output
