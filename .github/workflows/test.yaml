@@ -28,7 +28,7 @@ jobs:
       uses: ./ # Use the path to your action directory
       with:
         # Your action's inputs
-        command: "cat /etc/passwd | head -10 | lolcat"
+        command: "cat /etc/passwd | lolcat"
         dependencies: |
           lolcat
         output: "docs/example.svg"
