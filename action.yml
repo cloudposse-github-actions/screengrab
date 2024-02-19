@@ -133,7 +133,7 @@ runs:
 
     - name: Run puppeteer convert HTML to image
       id: screenshot
-      if: ${{ contains('svg png jpeg jpg pdf', inputs.outputType) }}
+      if: ${{ contains(fromJson("['svg', 'png', 'jpeg', 'jpg', 'pdf']"), inputs.outputType) }}
       uses: 'cloudposse-github-actions/screenshot@svg-support'
       with:
         # Your action's inputs
