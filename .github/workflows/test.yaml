@@ -1,0 +1,93 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+
+
+  screengrab:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.type }}
+      cancel-in-progress: true
+    strategy:
+      matrix:
+        type: [svg, png, jpg, pdf, html, ansi]
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run this composite action
+      id: screengrab
+      uses: ./ # Use the path to your action directory
+      with:
+        # Your action's inputs
+        command: "(fortune ascii-art && fortune computers) | lolcat"
+        dependencies: >-
+          lolcat
+          fortune
+          fortunes
+        output: "docs/example.${{ matrix.type }}"
+        outputType: "${{ matrix.type }}"
+        viewportWidth: 600
+        viewportHeight: 450
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Rebase before push (optimistic concurrency)
+      shell: bash
+      run: |
+          git stash || true
+          git pull --rebase -X ours origin ${{ github.ref }} --rebase
+          git stash apply || true
+
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      name: Commit artifact
+      id: auto-commit
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        commit_message: "chore: update ${{matrix.type}} example image"
+        commit_user_name: screengrab-action 💻
+        commit_user_email: actions@github.com
+        commit_author: screengrab-action 💻 <actions@github.com>
+        file_pattern: '${{ steps.screengrab.outputs.file }}'
+
+    - name: Add Image to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && (matrix.type == 'svg' || matrix.type == 'png' || matrix.type == 'jpg')
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "![Generated Screengrab](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add PDF to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'pdf'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated PDF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.image }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add HTML to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'html'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated HTML](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.html }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: Add ANSI to Step Summary
+      if: steps.auto-commit.outputs.changes_detected == 'true' && matrix.type == 'ansi'
+      run: |
+        echo "## Generated Screengrab (${{matrix.type}})" >> $GITHUB_STEP_SUMMARY
+        echo "[Generated ANSI](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/${{ steps.screengrab.outputs.ansi }}?raw=true)" >> $GITHUB_STEP_SUMMARY
+
+    - name: No changes
+      if: steps.auto-commit.outputs.changes_detected == 'false'
+      run: |
+        echo "No changes to screengrab" >> $GITHUB_STEP_SUMMARY
